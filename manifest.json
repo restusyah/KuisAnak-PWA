@@ -1,0 +1,20 @@
+{
+  "name": "Quiz Belajar Anak",
+  "short_name": "QuizAnak",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4caf50",
+  "icons": [
+    {
+      "src": "/assets/icons/kids.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/icons/kidds.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

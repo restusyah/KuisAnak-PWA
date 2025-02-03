@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz Belajar Anak</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="assets/icons/kidds.png" type="image/png">
+  <link rel="apple-touch-icon" href="assets/icons/kids.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#4caf50">
+</head>
+<body>
+  <header>
+    <h1>Quiz Belajar Anak</h1>
+  </header>
+
+  <main>
+    <!-- Form Input Nama -->
+    <div id="user-info" class="card">
+      <h2>Masukkan Nama Anda</h2>
+      <input type="text" id="username" placeholder="Masukkan nama Anda" />
+      <button id="save-name">Mulai Quiz</button>
+    </div>
+
+    <!-- Pemilihan Kategori Quiz -->
+    <div id="categories" class="card hidden">
+      <h2>Selamat Datang, <span id="username-display"></span>!</h2>
+      <p>Pilih kategori quiz untuk mulai belajar:</p>
+      
+      <!-- Container untuk tombol kategori -->
+      <div class="category-container">
+        <button class="category" onclick="startQuiz('audiotory')">Audiotori</button>
+        <button class="category" onclick="startQuiz('visual')">Visual</button>
+      </div>
+      
+      <!-- Tombol kembali -->
+      <div class="back-container">
+        <button id="back-button" class="back">Kembali</button>
+      </div>
+    </div>
+    
+  </main>
+
+  <footer>
+    <p>© 2024 Quiz Belajar Anak | Kelompok 2</p>
+  </footer>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const savedName = localStorage.getItem("quizUsername");
+      const userInfo = document.getElementById("user-info");
+      const categories = document.getElementById("categories");
+      const usernameDisplay = document.getElementById("username-display");
+
+      if (savedName) {
+        userInfo.classList.add("hidden");
+        categories.classList.remove("hidden");
+        usernameDisplay.textContent = savedName;
+      } else {
+        userInfo.classList.remove("hidden");
+        categories.classList.add("hidden");
+      }
+    });
+
+    document.getElementById("save-name").addEventListener("click", function () {
+      const username = document.getElementById("username").value.trim();
+      if (username) {
+        localStorage.setItem("quizUsername", username);
+        document.getElementById("user-info").classList.add("hidden");
+        document.getElementById("categories").classList.remove("hidden");
+        document.getElementById("username-display").textContent = username;
+      } else {
+        alert("Silakan masukkan nama terlebih dahulu!");
+      }
+    });
+
+    function startQuiz(category) {
+      if (category === "audiotory") {
+        window.location.href = "quizaudiotory.html";
+      } else if (category === "visual") {
+        window.location.href = "quiz.html?category=visual";
+      }
+    }
+
+    document.getElementById("back-button").addEventListener("click", function () {
+      const confirmBack = confirm("Apakah Anda yakin ingin kembali? Nama Anda akan dihapus.");
+      if (confirmBack) {
+        localStorage.removeItem("quizUsername");
+        document.getElementById("categories").classList.add("hidden");
+        document.getElementById("user-info").classList.remove("hidden");
+      }
+    });
+
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("/serviceworker.js")
+          .then(function (registration) {
+            console.log("Service Worker berhasil didaftarkan dengan cakupan:", registration.scope);
+          })
+          .catch(function (error) {
+            console.error("Service Worker gagal didaftarkan:", error);
+          });
+      });
+    }
+  </script>
+</body>
+</html>
