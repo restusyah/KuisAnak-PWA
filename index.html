@@ -146,13 +146,17 @@
       document.getElementById("register").classList.remove("hidden");
     });
 
-    // Cek apakah sudah login
-    document.addEventListener("DOMContentLoaded", function () {
-      if (localStorage.getItem("quizUsername") && localStorage.getItem("quizPassword")) {
+        document.addEventListener("DOMContentLoaded", function () {
+      const savedUsername = localStorage.getItem("quizUsername");
+      const savedPassword = localStorage.getItem("quizPassword");
+
+      if (savedUsername && savedPassword) {
+        // Jika sudah login, tampilkan halaman kategori
         document.getElementById("login").classList.add("hidden");
         document.getElementById("categories").classList.remove("hidden");
-        document.getElementById("username-display").textContent = localStorage.getItem("quizUsername");
+        document.getElementById("username-display").textContent = savedUsername;
       } else {
+        // Jika belum login, tampilkan form login
         document.getElementById("login").classList.remove("hidden");
         document.getElementById("categories").classList.add("hidden");
       }
@@ -214,6 +218,15 @@
         document.getElementById("categories").classList.add("hidden");
         document.getElementById("login").classList.remove("hidden");
       }
+    // Fungsi untuk tombol Keluar
+    document.getElementById("back-button").addEventListener("click", function () {
+      // Hapus data login dari localStorage
+      localStorage.removeItem("quizUsername");
+      localStorage.removeItem("quizPassword");
+
+      // Refresh halaman
+      window.location.reload();
+    });
     });
   </script>
 </body>
