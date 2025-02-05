@@ -110,7 +110,7 @@ window.checkAnswer = (selected) => {
           <p>Anda telah menyelesaikan quiz dengan skor:</p>
           <div class="score-box">${score} / ${quizzes.length}</div>
           <p class="feedback">${getFeedback(score, quizzes.length)}</p>
-          <button class="btn-home" onclick="location.href='index.html'">🏠 Kembali ke Beranda</button>
+          <button class="btn-home" onclick="location.href='index.html#'">🏠 Kembali ke Beranda</button>
         </div>
       `;
     }

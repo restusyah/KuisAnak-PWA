@@ -9,6 +9,7 @@
   <link rel="apple-touch-icon" href="assets/icons/kids.png">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#4caf50">
+
 </head>
 <body>
   <header>
@@ -16,30 +17,56 @@
   </header>
 
   <main>
-    <!-- Form Input Nama -->
-    <div id="user-info" class="card">
-      <h2>Masukkan Nama Anda</h2>
-      <input type="text" id="username" placeholder="Masukkan nama Anda" />
-      <button id="save-name">Mulai Quiz</button>
+    <!-- Form Login -->
+    <div id="login" class="card">
+      <h2>Login</h2>
+      <input type="text" id="login-username" placeholder="Nama Pengguna" />
+      <input type="password" id="login-password" placeholder="Password" />
+      <button id="login-button">Masuk</button>
+      <p>Belum punya akun? <a href="#" id="to-register">Daftar</a></p>
     </div>
 
-    <!-- Pemilihan Kategori Quiz -->
+    <!-- Form Pendaftaran -->
+    <div id="register" class="card hidden">
+      <h2>Daftar</h2>
+      <input type="text" id="register-username" placeholder="Nama Pengguna" />
+      <input type="password" id="register-password" placeholder="Password" />
+      <input type="password" id="register-confirm-password" placeholder="Konfirmasi Password" />
+      <button id="register-button">Daftar</button>
+      <p>Sudah punya akun? <a href="#" id="to-login">Masuk</a></p>
+    </div>
+
+    <!-- Pemilihan Kategori Quiz & Profil Pengguna -->
     <div id="categories" class="card hidden">
       <h2>Selamat Datang, <span id="username-display"></span>!</h2>
       <p>Pilih kategori quiz untuk mulai belajar:</p>
-      
-      <!-- Container untuk tombol kategori -->
       <div class="category-container">
         <button class="category" onclick="startQuiz('audiotory')">Audiotori</button>
         <button class="category" onclick="startQuiz('visual')">Visual</button>
       </div>
-      
-      <!-- Tombol kembali -->
+      <div class="profile-actions">
+        <button id="edit-profile">Edit Profil</button>
+        <button id="delete-account" class="danger">Hapus Akun</button>
+      </div>
       <div class="back-container">
-        <button id="back-button" class="back">Kembali</button>
+        <button id="back-button" class="back">Keluar</button>
       </div>
     </div>
-    
+
+    <!-- Form Edit Profil -->
+    <div id="edit-profile-form" class="card hidden">
+      <h2>Edit Profil</h2>
+      <input type="text" id="edit-username" placeholder="Nama Pengguna Baru" />
+      <input type="password" id="edit-password" placeholder="Password Baru" />
+      <input type="password" id="edit-confirm-password" placeholder="Konfirmasi Password Baru" />
+      <button id="save-profile">Simpan Perubahan</button>
+      <button id="cancel-edit-profile" class="danger">Batal</button>
+    </div>
+
+    <!-- Notifikasi Toast -->
+    <div id="toast">
+      <span id="toast-message"></span>
+    </div>
   </main>
 
   <footer>
@@ -47,34 +74,91 @@
   </footer>
 
   <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const savedName = localStorage.getItem("quizUsername");
-      const userInfo = document.getElementById("user-info");
-      const categories = document.getElementById("categories");
-      const usernameDisplay = document.getElementById("username-display");
+    // Fungsi untuk menampilkan toast notification
+    function showToast(message, isSuccess = false, duration = 3000) {
+      const toast = document.getElementById("toast");
+      const toastMessage = document.getElementById("toast-message");
 
-      if (savedName) {
-        userInfo.classList.add("hidden");
-        categories.classList.remove("hidden");
-        usernameDisplay.textContent = savedName;
+      // Set pesan notifikasi
+      toastMessage.textContent = message;
+
+      // Tambahkan class 'toast-success' jika notifikasi berhasil
+      if (isSuccess) {
+        toast.classList.add("toast-success");
       } else {
-        userInfo.classList.remove("hidden");
-        categories.classList.add("hidden");
+        toast.classList.remove("toast-success"); // Hapus class jika ada
       }
-    });
 
-    document.getElementById("save-name").addEventListener("click", function () {
-      const username = document.getElementById("username").value.trim();
-      if (username) {
-        localStorage.setItem("quizUsername", username);
-        document.getElementById("user-info").classList.add("hidden");
+      // Tampilkan notifikasi
+      toast.classList.add("show");
+
+      // Sembunyikan notifikasi setelah durasi tertentu
+      setTimeout(() => {
+        toast.classList.remove("show");
+        toast.classList.remove("toast-success"); // Hapus class setelah notifikasi hilang
+      }, duration);
+    }
+
+    // Fungsi untuk login
+    document.getElementById("login-button").addEventListener("click", function () {
+      const username = document.getElementById("login-username").value.trim();
+      const password = document.getElementById("login-password").value.trim();
+      const savedUsername = localStorage.getItem("quizUsername");
+      const savedPassword = localStorage.getItem("quizPassword");
+
+      if (username === savedUsername && password === savedPassword) {
+        // Login berhasil
+        document.getElementById("login").classList.add("hidden");
         document.getElementById("categories").classList.remove("hidden");
         document.getElementById("username-display").textContent = username;
       } else {
-        alert("Silakan masukkan nama terlebih dahulu!");
+        showToast("Nama pengguna atau password salah!");
       }
     });
 
+    // Fungsi untuk mendaftar
+    document.getElementById("register-button").addEventListener("click", function () {
+      const username = document.getElementById("register-username").value.trim();
+      const password = document.getElementById("register-password").value.trim();
+      const confirmPassword = document.getElementById("register-confirm-password").value.trim();
+
+      if (password !== confirmPassword) {
+        showToast("Password dan konfirmasi password tidak cocok!");
+        return;
+      }
+
+      localStorage.setItem("quizUsername", username);
+      localStorage.setItem("quizPassword", password);
+      showToast("Pendaftaran berhasil! Silakan login.", true); // Notifikasi berhasil
+      document.getElementById("register").classList.add("hidden");
+      document.getElementById("login").classList.remove("hidden");
+    });
+
+    // Fungsi untuk kembali ke form login
+    document.getElementById("to-login").addEventListener("click", function () {
+      document.getElementById("register").classList.add("hidden");
+      document.getElementById("login").classList.remove("hidden");
+    });
+
+    // Fungsi untuk ke halaman daftar
+    document.getElementById("to-register").addEventListener("click", function () {
+      document.getElementById("login").classList.add("hidden");
+      document.getElementById("register").classList.remove("hidden");
+    });
+
+    // Cek apakah sudah login
+    document.addEventListener("DOMContentLoaded", function () {
+      if (localStorage.getItem("quizUsername") && localStorage.getItem("quizPassword")) {
+        document.getElementById("login").classList.add("hidden");
+        document.getElementById("categories").classList.remove("hidden");
+        document.getElementById("username-display").textContent = localStorage.getItem("quizUsername");
+      } else {
+        document.getElementById("login").classList.remove("hidden");
+        document.getElementById("categories").classList.add("hidden");
+      }
+    });
+
+    // Fungsi untuk mulai quiz
     function startQuiz(category) {
       if (category === "audiotory") {
         window.location.href = "quizaudiotory.html";
@@ -83,26 +167,54 @@
       }
     }
 
+    // Fungsi kembali ke form input nama
     document.getElementById("back-button").addEventListener("click", function () {
-      const confirmBack = confirm("Apakah Anda yakin ingin kembali? Nama Anda akan dihapus.");
-      if (confirmBack) {
-        localStorage.removeItem("quizUsername");
-        document.getElementById("categories").classList.add("hidden");
-        document.getElementById("user-info").classList.remove("hidden");
-      }
+      document.getElementById("categories").classList.add("hidden");
+      document.getElementById("login").classList.remove("hidden");
     });
 
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", function () {
-        navigator.serviceWorker.register("/serviceworker.js")
-          .then(function (registration) {
-            console.log("Service Worker berhasil didaftarkan dengan cakupan:", registration.scope);
-          })
-          .catch(function (error) {
-            console.error("Service Worker gagal didaftarkan:", error);
-          });
-      });
-    }
+    // Fungsi untuk menampilkan form edit profil
+    document.getElementById("edit-profile").addEventListener("click", function () {
+      document.getElementById("categories").classList.add("hidden");
+      document.getElementById("edit-profile-form").classList.remove("hidden");
+      document.getElementById("edit-username").value = localStorage.getItem("quizUsername");
+    });
+
+    // Fungsi untuk menyimpan perubahan profil
+    document.getElementById("save-profile").addEventListener("click", function () {
+      const newUsername = document.getElementById("edit-username").value.trim();
+      const newPassword = document.getElementById("edit-password").value.trim();
+      const confirmPassword = document.getElementById("edit-confirm-password").value.trim();
+
+      if (newPassword !== confirmPassword) {
+        showToast("Password dan konfirmasi password tidak cocok!");
+        return;
+      }
+
+      localStorage.setItem("quizUsername", newUsername);
+      localStorage.setItem("quizPassword", newPassword);
+      document.getElementById("username-display").textContent = newUsername;
+      showToast("Profil berhasil diperbarui!",true);
+      document.getElementById("edit-profile-form").classList.add("hidden");
+      document.getElementById("categories").classList.remove("hidden");
+    });
+
+    // Fungsi untuk membatalkan edit profil
+    document.getElementById("cancel-edit-profile").addEventListener("click", function () {
+      document.getElementById("edit-profile-form").classList.add("hidden");
+      document.getElementById("categories").classList.remove("hidden");
+    });
+
+    // Hapus akun
+    document.getElementById("delete-account").addEventListener("click", function () {
+      const confirmDelete = confirm("Apakah Anda yakin ingin menghapus akun? Semua data akan hilang.");
+      if (confirmDelete) {
+        localStorage.removeItem("quizUsername");
+        localStorage.removeItem("quizPassword");
+        document.getElementById("categories").classList.add("hidden");
+        document.getElementById("login").classList.remove("hidden");
+      }
+    });
   </script>
 </body>
 </html>
