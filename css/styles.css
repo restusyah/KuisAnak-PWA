@@ -89,7 +89,7 @@ body {
 header h1 {
   color: #ffffff;
   font-size: 32px;
-  margin-bottom: 20px;
+  margin-bottom: -20px;
   text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
   animation: bounce 1s infinite alternate;
 }
@@ -416,4 +416,117 @@ h2 {
   background-color: #4caf50; /* Warna hijau */
   color: white; /* Warna teks putih */
   border-color: #45a049; /* Warna border hijau lebih gelap */
+}
+
+/* Admin Dashboard Styles */
+.user-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.user-item button {
+  margin-left: 10px;
+  padding: 5px 10px;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 5px;
+  width: 300px;
+}
+
+.modal-actions {
+  margin-top: 15px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.hidden {
+  display: none;
+}
+
+
+#logout-admin {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 50px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #f44336; /* Warna merah */
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+#logout-admin::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.2);
+  transition: all 0.5s ease;
+}
+
+#logout-admin:hover::before {
+  left: 100%; /* Efek cahaya bergerak */
+}
+
+#logout-admin:hover {
+  background: #d32f2f; /* Warna merah lebih gelap saat hover */
+  transform: scale(1.05); /* Efek membesar sedikit */
+}
+/* Container Daftar Pengguna */
+.user-list-container {
+  display: flex;
+  flex-direction: column; /* Memastikan daftar turun ke bawah */
+  gap: 10px; /* Jarak antar kotak */
+  margin-top: 15px;
+  max-height: 55vh; /* Batas tinggi daftar pengguna */
+  overflow-y: auto; /* Tambahkan scroll jika daftar panjang */
+}
+
+/* Kotak Pengguna */
+.user-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+  width: 100%; /* Pastikan kotak tetap di dalam container */
+}
+
+.user-item:hover {
+  transform: scale(1.02);
+}
+
+/* Responsif */
+@media (max-width: 768px) {
+  .user-list-container {
+    max-height: none; /* Hilangkan batas tinggi di layar kecil */
+    overflow-y: visible;
+  }
 }

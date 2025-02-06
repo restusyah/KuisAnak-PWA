@@ -98,36 +98,60 @@
 document.getElementById("login-button").addEventListener("click", function () {
   const username = document.getElementById("login-username").value.trim();
   const password = document.getElementById("login-password").value.trim();
-  const savedUsername = localStorage.getItem("quizUsername");
-  const savedPassword = localStorage.getItem("quizPassword");
+  const accounts = JSON.parse(localStorage.getItem("quizAccounts")) || [];
+  
+  const foundAccount = accounts.find(account => 
+    account.username === username && account.password === password
+  );
 
-  if (username === savedUsername && password === savedPassword) {
+  if (foundAccount) {
     sessionStorage.setItem("loggedIn", "true");
-    document.getElementById("login").classList.add("hidden");
-    document.getElementById("categories").classList.remove("hidden");
-    document.getElementById("username-display").textContent = username;
+    sessionStorage.setItem("currentUsername", username);
+    
+    if (foundAccount.role === "admin") {
+      // Redirect ke dashboard admin
+      window.location.href = "admin-dashboard.html";
+    } else {
+      document.getElementById("login").classList.add("hidden");
+      document.getElementById("categories").classList.remove("hidden");
+      document.getElementById("username-display").textContent = username;
+    }
   } else {
     showToast("Nama pengguna atau password salah!");
   }
 });
 
-    // Fungsi untuk mendaftar
-    document.getElementById("register-button").addEventListener("click", function () {
-      const username = document.getElementById("register-username").value.trim();
-      const password = document.getElementById("register-password").value.trim();
-      const confirmPassword = document.getElementById("register-confirm-password").value.trim();
+// Fungsi untuk mendaftar
+document.getElementById("register-button").addEventListener("click", function () {
+  const username = document.getElementById("register-username").value.trim();
+  const password = document.getElementById("register-password").value.trim();
+  const confirmPassword = document.getElementById("register-confirm-password").value.trim();
 
-      if (password !== confirmPassword) {
-        showToast("Password dan konfirmasi password tidak cocok!");
-        return;
-      }
+  if (password !== confirmPassword) {
+    showToast("Password dan konfirmasi password tidak cocok!");
+    return;
+  }
 
-      localStorage.setItem("quizUsername", username);
-      localStorage.setItem("quizPassword", password);
-      showToast("Pendaftaran berhasil! Silakan login.", true); // Notifikasi berhasil
-      document.getElementById("register").classList.add("hidden");
-      document.getElementById("login").classList.remove("hidden");
-    });
+  // Ambil data akun yang sudah terdaftar dari Local Storage
+  let accounts = JSON.parse(localStorage.getItem("quizAccounts")) || [];
+
+  // Cek apakah username sudah terdaftar
+  const isUsernameTaken = accounts.some(account => account.username === username);
+  if (isUsernameTaken) {
+    showToast("Nama pengguna sudah terdaftar!");
+    return;
+  }
+
+  // Tambahkan akun baru ke dalam array
+  accounts.push({ username, password });
+
+  // Simpan kembali ke Local Storage
+  localStorage.setItem("quizAccounts", JSON.stringify(accounts));
+
+  showToast("Pendaftaran berhasil! Silakan login.", true); // Notifikasi berhasil
+  document.getElementById("register").classList.add("hidden");
+  document.getElementById("login").classList.remove("hidden");
+});
 
     // Fungsi untuk kembali ke form login
     document.getElementById("to-login").addEventListener("click", function () {
@@ -142,18 +166,43 @@ document.getElementById("login-button").addEventListener("click", function () {
     });
 
     document.addEventListener("DOMContentLoaded", function () {
-  const savedUsername = localStorage.getItem("quizUsername");
-  const savedPassword = localStorage.getItem("quizPassword");
+  const currentUsername = sessionStorage.getItem("currentUsername");
+  const accounts = JSON.parse(localStorage.getItem("quizAccounts")) || [];
 
-  if (sessionStorage.getItem("loggedIn") === "true" && savedUsername && savedPassword) {
-    document.getElementById("login").classList.add("hidden");
-    document.getElementById("categories").classList.remove("hidden");
-    document.getElementById("username-display").textContent = savedUsername;
-  } else {
-    sessionStorage.removeItem("loggedIn");
-    document.getElementById("login").classList.remove("hidden");
-    document.getElementById("categories").classList.add("hidden");
+  // Inisialisasi akun admin jika belum ada
+  const adminAccount = accounts.find(acc => acc.role === "admin");
+  if (!adminAccount) {
+    accounts.push({
+      username: "admin",
+      password: "admin123",
+      role: "admin"
+    });
+    localStorage.setItem("quizAccounts", JSON.stringify(accounts));
   }
+
+  // Cek apakah pengguna sudah login
+  if (sessionStorage.getItem("loggedIn") === "true" && currentUsername) {
+    const foundAccount = accounts.find(account => account.username === currentUsername);
+    if (foundAccount) {
+      document.getElementById("login").classList.add("hidden");
+
+      // Jika admin, redirect ke halaman admin
+      if (foundAccount.role === "admin") {
+        window.location.href = "admin-dashboard.html";
+      } else {
+        // Jika pengguna biasa, tampilkan halaman kategori
+        document.getElementById("categories").classList.remove("hidden");
+        document.getElementById("username-display").textContent = currentUsername;
+      }
+      return;
+    }
+  }
+
+  // Jika tidak ada pengguna yang login, tampilkan halaman login
+  sessionStorage.removeItem("loggedIn");
+  sessionStorage.removeItem("currentUsername");
+  document.getElementById("login").classList.remove("hidden");
+  document.getElementById("categories").classList.add("hidden");
 });
 
     // Fungsi untuk mulai quiz
@@ -164,13 +213,20 @@ document.getElementById("login-button").addEventListener("click", function () {
         window.location.href = "quiz.html?category=visual";
       }
     }
-
-    // Fungsi untuk menampilkan form edit profil
     document.getElementById("edit-profile").addEventListener("click", function () {
-      document.getElementById("categories").classList.add("hidden");
-      document.getElementById("edit-profile-form").classList.remove("hidden");
-      document.getElementById("edit-username").value = localStorage.getItem("quizUsername");
-    });
+  const currentUser = JSON.parse(localStorage.getItem("quizAccounts")).find(
+    acc => acc.username === sessionStorage.getItem("currentUsername")
+  );
+  
+  if (currentUser.role === "admin") {
+    showToast("Admin tidak bisa edit profil melalui ini!");
+    return;
+  }
+  
+  document.getElementById("categories").classList.add("hidden");
+  document.getElementById("edit-profile-form").classList.remove("hidden");
+  document.getElementById("edit-username").value = currentUser.username;
+});
 
     document.getElementById("save-profile").addEventListener("click", function () {
   const newUsername = document.getElementById("edit-username").value.trim();
@@ -183,22 +239,32 @@ document.getElementById("login-button").addEventListener("click", function () {
     return;
   }
 
-  // Jika password diubah, pastikan konfirmasi password tidak kosong
-  if (newPassword && !confirmPassword) {
-    showToast("Konfirmasi password tidak boleh kosong!");
+  // Ambil data akun yang sudah terdaftar dari Local Storage
+  let accounts = JSON.parse(localStorage.getItem("quizAccounts")) || [];
+  const currentUsername = sessionStorage.getItem("currentUsername");
+
+  // Cari akun yang sedang login
+  const accountIndex = accounts.findIndex(account => account.username === currentUsername);
+
+  if (accountIndex === -1) {
+    showToast("Akun tidak ditemukan!");
     return;
   }
 
-  // Simpan perubahan username jika ada
+  // Update username jika diubah
   if (newUsername) {
-    localStorage.setItem("quizUsername", newUsername);
+    accounts[accountIndex].username = newUsername;
+    sessionStorage.setItem("currentUsername", newUsername); // Update username yang sedang login
     document.getElementById("username-display").textContent = newUsername;
   }
 
-  // Simpan perubahan password jika ada
+  // Update password jika diubah
   if (newPassword) {
-    localStorage.setItem("quizPassword", newPassword);
+    accounts[accountIndex].password = newPassword;
   }
+
+  // Simpan kembali ke Local Storage
+  localStorage.setItem("quizAccounts", JSON.stringify(accounts));
 
   showToast("Profil berhasil diperbarui!", true);
   document.getElementById("edit-profile-form").classList.add("hidden");
@@ -223,23 +289,37 @@ document.getElementById("login-button").addEventListener("click", function () {
       });
     });
 
-    // Hapus akun
-    document.getElementById("delete-account").addEventListener("click", function () {
-      const confirmDelete = confirm("Apakah Anda yakin ingin menghapus akun? Semua data akan hilang.");
-      if (confirmDelete) {
-        localStorage.removeItem("quizUsername");
-        localStorage.removeItem("quizPassword");
-        document.getElementById("categories").classList.add("hidden");
-        document.getElementById("login").classList.remove("hidden");
-      }
-    });
+// Hapus akun
+document.getElementById("delete-account").addEventListener("click", function () {
+  const confirmDelete = confirm("Apakah Anda yakin ingin menghapus akun? Semua data akan hilang.");
+  if (confirmDelete) {
+    const currentUsername = sessionStorage.getItem("currentUsername");
 
-    // Logout tetap menyimpan akun
-    document.getElementById("back-button").addEventListener("click", function () {
-      sessionStorage.removeItem("loggedIn");
-      document.getElementById("categories").classList.add("hidden");
-      document.getElementById("login").classList.remove("hidden");
-    });
+    // Ambil data akun yang sudah terdaftar dari Local Storage
+    let accounts = JSON.parse(localStorage.getItem("quizAccounts")) || [];
+
+    // Filter out the account to be deleted
+    accounts = accounts.filter(account => account.username !== currentUsername);
+
+    // Simpan kembali ke Local Storage
+    localStorage.setItem("quizAccounts", JSON.stringify(accounts));
+
+    // Hapus session
+    sessionStorage.removeItem("loggedIn");
+    sessionStorage.removeItem("currentUsername");
+
+    document.getElementById("categories").classList.add("hidden");
+    document.getElementById("login").classList.remove("hidden");
+  }
+});
+
+// Logout tetap menyimpan akun
+document.getElementById("back-button").addEventListener("click", function () {
+  sessionStorage.removeItem("loggedIn");
+  sessionStorage.removeItem("currentUsername");
+  document.getElementById("categories").classList.add("hidden");
+  document.getElementById("login").classList.remove("hidden");
+});
 
 
     if ("serviceWorker" in navigator) {

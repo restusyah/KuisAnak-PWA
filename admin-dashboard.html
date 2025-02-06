@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <link rel="stylesheet" href="css/styles.css">
+  <!-- Same head as index.html -->
+</head>
+<body>
+  <header>
+    <h1>Admin Dashboard</h1>
+  </header>
+
+<main>
+  <!-- Tombol Logout di pojok kiri atas -->
+  <div class="logout-container">
+    <button id="logout-admin" class="danger">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </button>
+  </div>
+
+  <!-- Konten utama -->
+  <div class="card">
+    <h2>Daftar Pengguna</h2>
+    <div class="user-list-container">
+      <div id="user-list" class="user-table"></div>
+    </div>
+  </div>
+</main>
+
+  <!-- Edit User Modal -->
+  <div id="edit-user-modal" class="modal hidden">
+    <div class="modal-content">
+      <h3>Edit Pengguna</h3>
+      <input type="text" id="edit-user-username" placeholder="Username">
+      <input type="password" id="edit-user-password" placeholder="Password Baru">
+      <div class="modal-actions">
+        <button id="save-user-changes">Simpan</button>
+        <button id="cancel-edit-user" class="danger">Batal</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Load users dengan tampilan melebar (horizontal)
+    function loadUsers() {
+      const users = JSON.parse(localStorage.getItem("quizAccounts")) || [];
+      const userList = document.getElementById("user-list");
+      userList.innerHTML = "";
+
+      users.forEach((user, index) => {
+        if (user.role !== "admin") {
+          const userDiv = document.createElement("div");
+          userDiv.className = "user-card";
+          userDiv.innerHTML = `
+            <strong>${user.username}</strong>
+            <div>
+              <button class="edit-user" data-index="${index}">Edit</button>
+              <button class="delete-user" data-index="${index}">Hapus</button>
+            </div>
+          `;
+          userList.appendChild(userDiv);
+        }
+      });
+    }
+
+
+    // Handle edit user
+    document.addEventListener("click", function(e) {
+      if (e.target.classList.contains("edit-user")) {
+        const index = e.target.dataset.index;
+        const users = JSON.parse(localStorage.getItem("quizAccounts"));
+        const user = users[index];
+        
+        document.getElementById("edit-user-username").value = user.username;
+        document.getElementById("edit-user-modal").classList.remove("hidden");
+        
+        // Save changes
+        document.getElementById("save-user-changes").onclick = () => {
+          const newUsername = document.getElementById("edit-user-username").value.trim();
+          const newPassword = document.getElementById("edit-user-password").value.trim();
+          
+          users[index].username = newUsername;
+          if (newPassword) users[index].password = newPassword;
+          
+          localStorage.setItem("quizAccounts", JSON.stringify(users));
+          loadUsers();
+          document.getElementById("edit-user-modal").classList.add("hidden");
+        };
+      }
+    });
+
+    // Handle delete user
+    document.addEventListener("click", function(e) {
+      if (e.target.classList.contains("delete-user")) {
+        const index = e.target.dataset.index;
+        const users = JSON.parse(localStorage.getItem("quizAccounts"));
+        
+        if (confirm("Apakah Anda yakin ingin menghapus pengguna ini?")) {
+          users.splice(index, 1);
+          localStorage.setItem("quizAccounts", JSON.stringify(users));
+          loadUsers();
+        }
+      }
+    });
+
+    // Modal handling
+    document.getElementById("cancel-edit-user").addEventListener("click", () => {
+      document.getElementById("edit-user-modal").classList.add("hidden");
+    });
+
+    // Logout
+    document.getElementById("logout-admin").addEventListener("click", () => {
+      sessionStorage.clear();
+      window.location.href = "index.html";
+    });
+
+    // Initial load
+    loadUsers();
+  </script>
+</body>
+</html>
